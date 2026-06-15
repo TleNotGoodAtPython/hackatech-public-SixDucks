@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claim Status</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            width: 320px;
+            text-align: center;
+        }
+        .icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+        }
+        .success-icon { color: #28a745; }
+        .error-icon { color: #dc3545; }
+        
+        h2 {
+            margin: 10px 0;
+            color: #333;
+        }
+        p {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .points-badge {
+            display: inline-block;
+            background: #e2f0d9;
+            color: #28a745;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 18px;
+            margin: 15px 0;
+        }
+        .btn {
+            display: inline-block;
+            width: 100%;
+            padding: 12px;
+            background: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            box-sizing: border-box;
+            margin-top: 20px;
+        }
+        .btn:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    {% if success %}
+        <div class="icon success-icon">🎉</div>
+        <h2>Success, {{ username }}!</h2>
+        <p>Your trash was successfully processed.</p>
+        <div class="points-badge">+{{ points }} Points</div>
+        <p>Your balance has been updated in the system.</p>
+    {% else %}
+        <div class="icon error-icon">❌</div>
+        <h2>Claim Failed</h2>
+        <p>{{ message }}</p>
+    {% endif %}
+    
+    <a href="/" class="btn">Go to Dashboard</a>
+</div>
+
+</body>
+</html>
