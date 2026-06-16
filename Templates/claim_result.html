@@ -7,7 +7,10 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f4f4f9;
+            background-image: url(https://images.adsttc.com/media/images/64ca/bc7c/edf1/6922/4519/32c9/newsletter/benjakitti-forest-park-arsomslip-community-and-environmental-architect_8.jpg?1691008163);
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: cover;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -15,10 +18,12 @@
             margin: 0;
         }
         .card {
-            background: white;
+            background: rgba(40, 40, 40, 0.85); /* Cleaner, darker gray */
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             padding: 30px;
             border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             width: 320px;
             text-align: center;
         }
@@ -31,10 +36,10 @@
         
         h2 {
             margin: 10px 0;
-            color: #333;
+            color: #ffffff;
         }
         p {
-            color: #666;
+            color: #e0e0e0;
             font-size: 16px;
             line-height: 1.5;
         }
@@ -64,7 +69,6 @@
     </style>
 </head>
 <body>
-
 <div class="card">
     {% if success %}
         <div class="icon success-icon">🎉</div>
