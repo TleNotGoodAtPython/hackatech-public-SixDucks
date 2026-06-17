@@ -9,11 +9,11 @@ app.secret_key = os.urandom(24)
 # PostgreSQL Connection Configuration
 # Replace these values with your actual database credentials
 DB_PARAMS = {
-    "dbname": "",
-    "user": "",
-    "password": "",
-    "host": "",
-    "port": ""
+    "dbname": "postgres",
+    "user": "postgres",
+    "password": "17mar2010",
+    "host": "localhost",
+    "port": "5432"
 }
 
 def get_db_connection():
