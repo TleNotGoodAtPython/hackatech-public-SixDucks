@@ -14,17 +14,18 @@ DB_PARAMS = {
     "password": "17mar2010",
     "host": "localhost",
     "port": "5432"
+    #for this project we use port 5432 and postgreSQL.
 }
 
 def get_db_connection():
     return psycopg2.connect(**DB_PARAMS)
 
-# http://localhost:5000/
+# http://yourhost:5000/
 @app.route('/')
 def index():
     return render_template('login_3.html')
 
-#Register Web Using HTTP POST http://localhost:5000/register
+#Register Web Using HTTP POST http://yourhost:5000/register
 @app.route('/register', methods=['POST'])
 def register():
     username = request.form.get('username')
@@ -48,7 +49,7 @@ def register():
     finally:
         cur.close()
         conn.close()
-# login using POST  http://localhost:5000/login
+# home using POST  http://localhost:5000/home
 @app.route('/home', methods=['POST'])
 def login():
     username = request.form.get('username')
@@ -63,7 +64,7 @@ def login():
     conn.close()
 
     if user and check_password_hash(user[1], password):
-        # 🌟 FIXED: Save the user's authentic database ID into the tracking session
+        # Save the user's authentic database ID into the tracking session
         session['user_id'] = user[0]
         session['username'] = username
         if 'user_id' in session:
@@ -112,7 +113,7 @@ def add_points():
         conn.commit()
         
         # Build the dynamic URL. Replace this with your current live Ngrok URL!
-        claim_url = f"https://rummage-array-baggie.ngrok-free.dev/claim?token={token}"
+        claim_url = f"http://10.243.199.96:5000/claim?token={token}"
         
         # Send it back to the ESP32
         return jsonify({
@@ -132,15 +133,11 @@ def add_points():
 def claim_points():
     """The web route users hit when scanning the QR code with their phones."""
     
-    # 🚨 BYPASSING LOGIN WALL FOR LOCAL TESTING:
-    # We comment this out so it stops booting you back to the login page '/'
+    
     if 'user_id' not in session:
         flash("Please log in first to claim your points!")
         return redirect('/')
     current_user_id = session['user_id']
-        
-    # FORCE the app to log points directly to Tlezer (User ID 1)
-    #current_user_id = 1 
     
     token = request.args.get('token')
     
@@ -151,7 +148,7 @@ def claim_points():
     cur = conn.cursor()
     
     try:
-        # 2. Fetch ticket status from the database
+        #Fetch ticket status from the database
         cur.execute("SELECT points, claimed FROM point_tickets WHERE ticket_code = %s;", (token,))
         ticket = cur.fetchone()
         
@@ -160,11 +157,11 @@ def claim_points():
             
         points, claimed = ticket[0], ticket[1]
         
-        # 3. Check if it's already been scanned
+        # Check if it's already been scanned
         if claimed:
             return render_template('claim_result.html', success=False, message="This QR Code has already been claimed!")
             
-        # 4. Atomic Update: Give points to user AND kill the ticket
+        # Atomic Update: Give points to user AND kill the ticket
         cur.execute("UPDATE users SET points = points + %s WHERE id = %s;", (points, current_user_id))
         cur.execute("UPDATE point_tickets SET claimed = TRUE, claimed_by_user_id = %s WHERE ticket_code = %s;", 
                     (current_user_id, token))
@@ -184,10 +181,66 @@ def claim_points():
         cur.close()
         conn.close()
 
+@app.route('/api/update-status', methods=['POST'])
+def update_status():
+    """Endpoint for ESP32 to report current volume/fullness status."""
+    data = request.get_json()
+    if not data or 'bin_id' not in data or 'is_full' not in data:
+        return jsonify({"status": "error", "message": "Invalid payload"}), 400
+
+    bin_id = data.get('bin_id')
+    is_full = data.get('is_full')
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        # Check the most recent status for this bin to see if it changed
+        cur.execute(
+            "SELECT is_full FROM bin_status_logs WHERE bin_id = %s ORDER BY changed_at DESC LIMIT 1;",
+            (bin_id,)
+        )
+        last_log = cur.fetchone()
+
+        # If there is no previous log, or the status has changed, insert a new record
+        if last_log is None or last_log[0] != is_full:
+            cur.execute(
+                "INSERT INTO bin_status_logs (bin_id, is_full) VALUES (%s, %s);",
+                (bin_id, is_full)
+            )
+            conn.commit()
+            return jsonify({"status": "success", "message": "Status change logged"}), 201
+        
+        return jsonify({"status": "success", "message": "No status change detected"}), 200
+
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route('/admin')
+def admin():
+    """Admin panel displaying bin status history logs."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        # Fetch status history sorted by newest first
+        cur.execute("SELECT bin_id, is_full, changed_at FROM bin_status_logs ORDER BY changed_at DESC;")
+        logs = cur.fetchall()
+        
+        return render_template("admin.html",logs=logs)
+    except Exception as e:
+        return f"Error loading admin dashboard: {str(e)}", 500
+    finally:
+        cur.close()
+        conn.close()
+
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect('/')
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(host="0.0.0.0",debug=True, port=5000)
+    #your host

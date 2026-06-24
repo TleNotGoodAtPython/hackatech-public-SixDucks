@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <title>Admin - Bin Status Log</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 40px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+                th { background-color: #f2f2f2; }
+                .full { color: red; font-weight: bold; }
+                .empty { color: green; font-weight: bold; }
+            </style>
+        </head>
+        <body>
+            <h2>Smart Bin Administration Panel</h2>
+            <h3>Bin Status Change History Logs</h3>
+            <table>
+                <tr>
+                    <th>Bin ID</th>
+                    <th>Status</th>
+                    <th>Timestamp Change</th>
+                </tr>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log[0] }}</td>
+                    <td>
+                        {% if log[1] %}
+                        <span class="full">FULL</span>
+                        {% else %}
+                        <span class="empty">AVAILABLE</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ log[2] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </body>
+        </html>
